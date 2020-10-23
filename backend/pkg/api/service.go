@@ -17,7 +17,7 @@ const (
 
 type Service interface {
 	PostSendMessage(ctx context.Context, message string) error
-	PostConnect(ctx context.Context, authKey string, authCRT string, brokerURL string) error
+	PostConnect(ctx context.Context, authKey string, authCRT string, brokerURL string, clientID string) error
 	PostDisconnect(ctx context.Context)
 }
 
@@ -40,14 +40,14 @@ func (s *deviceService) PostSendMessage(ctx context.Context, message string) err
 	return nil
 }
 
-func (s *deviceService) PostConnect(ctx context.Context, authKey string, authCRT string, brokerURL string) error {
+func (s *deviceService) PostConnect(ctx context.Context, authKey string, authCRT string, brokerURL string, clientID string) error {
 	conf, err := s.newTLSConfig(authKey, authCRT)
 	if err != nil {
 		return errors.New("Unable to load TLS configuration properties")
 	}
 	opts := MQTT.NewClientOptions()
 	opts.AddBroker(brokerURL)
-	opts.SetClientID("lamassu-client").SetTLSConfig(conf)
+	opts.SetClientID(clientID).SetTLSConfig(conf)
 
 	s.client = MQTT.NewClient(opts)
 	if token := s.client.Connect(); token.Wait() && token.Error() != nil {

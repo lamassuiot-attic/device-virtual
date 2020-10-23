@@ -30,11 +30,11 @@ func (mw loggingMidleware) PostSendMessage(ctx context.Context, message string) 
 	return mw.next.PostSendMessage(ctx, message)
 }
 
-func (mw loggingMidleware) PostConnect(ctx context.Context, authKey string, authCRT string, brokerURL string) (err error) {
+func (mw loggingMidleware) PostConnect(ctx context.Context, authKey string, authCRT string, brokerURL string, clientID string) (err error) {
 	defer func(begin time.Time) {
 		mw.logger.Log("method", "PostConnect", "took", time.Since(begin), "err", err)
 	}(time.Now())
-	return mw.next.PostConnect(ctx, authKey, authCRT, brokerURL)
+	return mw.next.PostConnect(ctx, authKey, authCRT, brokerURL, clientID)
 }
 
 func (mw loggingMidleware) PostDisconnect(ctx context.Context) {
