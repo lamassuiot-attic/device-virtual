@@ -7,6 +7,7 @@ import (
 )
 
 type Endpoints struct {
+	HealthEndpoint  endpoint.Endpoint
 	PostSendMessage endpoint.Endpoint
 	PostConnect     endpoint.Endpoint
 	PostDisconnect  endpoint.Endpoint
@@ -14,9 +15,17 @@ type Endpoints struct {
 
 func MakeServerEndpoints(s Service) Endpoints {
 	return Endpoints{
+		HealthEndpoint:  MakeHealthEndpoint(s),
 		PostConnect:     MakePostConnect(s),
 		PostDisconnect:  MakePostDisconnect(s),
 		PostSendMessage: MakePostSendMessage(s),
+	}
+}
+
+func MakeHealthEndpoint(s Service) endpoint.Endpoint {
+	return func(ctx context.Context, request interface{}) (response interface{}, err error) {
+		healthy := s.Health(ctx)
+		return healthResponse{Healthy: healthy}, nil
 	}
 }
 
@@ -42,6 +51,13 @@ func MakePostSendMessage(s Service) endpoint.Endpoint {
 		err = s.PostSendMessage(ctx, req.Message, req.Topic)
 		return postSendMessageResponse{Err: err}, nil
 	}
+}
+
+type healthRequest struct{}
+
+type healthResponse struct {
+	Healthy bool  `json:"healthy,omitempty"`
+	Err     error `json:"err,omitempty"`
 }
 
 type postConnectRequest struct {

@@ -23,6 +23,17 @@ type loggingMidleware struct {
 	logger log.Logger
 }
 
+func (mw loggingMidleware) Health(ctx context.Context) (healthy bool) {
+	defer func(begin time.Time) {
+		mw.logger.Log(
+			"method", "Health",
+			"took", time.Since(begin),
+			"healthy", healthy,
+		)
+	}(time.Now())
+	return mw.next.Health(ctx)
+}
+
 func (mw loggingMidleware) PostSendMessage(ctx context.Context, message string, topic string) (err error) {
 	defer func(begin time.Time) {
 		mw.logger.Log(

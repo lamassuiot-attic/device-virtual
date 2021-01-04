@@ -20,6 +20,13 @@ func MakeHTTPHandler(s Service, logger log.Logger) http.Handler {
 		httptransport.ServerErrorHandler(transport.NewLogErrorHandler(logger)),
 	}
 
+	r.Methods("GET").Path("/v1/device/health").Handler(httptransport.NewServer(
+		e.HealthEndpoint,
+		decodeHealthRequest,
+		encodeResponse,
+		options...,
+	))
+
 	r.Methods("POST").Path("/v1/device/connect").Handler(httptransport.NewServer(
 		e.PostConnect,
 		decodePostConnectRequest,
@@ -45,6 +52,11 @@ func MakeHTTPHandler(s Service, logger log.Logger) http.Handler {
 
 type errorer interface {
 	error() error
+}
+
+func decodeHealthRequest(ctx context.Context, r *http.Request) (request interface{}, err error) {
+	var req healthRequest
+	return req, nil
 }
 
 func decodePostSendMessageRequest(ctx context.Context, r *http.Request) (request interface{}, err error) {

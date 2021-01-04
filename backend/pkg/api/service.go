@@ -16,6 +16,7 @@ const (
 )
 
 type Service interface {
+	Health(ctx context.Context) bool
 	PostSendMessage(ctx context.Context, message string, topic string) error
 	PostConnect(ctx context.Context, authKey string, authCRT string, brokerURL string, clientID string) error
 	PostDisconnect(ctx context.Context)
@@ -40,6 +41,10 @@ var (
 	ErrClientIDEmpty  = errors.New("invalid empty client ID")
 	ErrTopicEmpty     = errors.New("invalid empty topic")
 )
+
+func (s *deviceService) Health(ctx context.Context) bool {
+	return true
+}
 
 func (s *deviceService) PostSendMessage(ctx context.Context, message string, topic string) error {
 	if topic == "" {
