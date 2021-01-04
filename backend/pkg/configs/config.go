@@ -15,9 +15,9 @@ type Config struct {
 	KeyFile  string
 }
 
-func NewConfig() (Config, error) {
+func NewConfig(prefix string) (Config, error) {
 	var cfg Config
-	err := envconfig.Process("device", &cfg)
+	err := envconfig.Process(prefix, &cfg)
 	if err != nil {
 		return Config{}, err
 	}

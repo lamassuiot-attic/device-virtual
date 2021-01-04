@@ -92,7 +92,7 @@ func encodeError(_ context.Context, err error, w http.ResponseWriter) {
 
 func codeFrom(err error) int {
 	switch err {
-	case ErrBadRequest:
+	case ErrDeviceAuth, ErrTLSConfLoading, ErrSendMessage:
 		return http.StatusBadRequest
 	default:
 		return http.StatusInternalServerError

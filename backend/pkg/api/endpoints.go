@@ -39,7 +39,7 @@ func MakePostDisconnect(s Service) endpoint.Endpoint {
 func MakePostSendMessage(s Service) endpoint.Endpoint {
 	return func(ctx context.Context, request interface{}) (response interface{}, err error) {
 		req := request.(postSendMessageRequest)
-		err = s.PostSendMessage(ctx, req.Message)
+		err = s.PostSendMessage(ctx, req.Message, req.Topic)
 		return postSendMessageResponse{Err: err}, nil
 	}
 }
@@ -63,6 +63,7 @@ type postDisconnectResponse struct{}
 
 type postSendMessageRequest struct {
 	Message string `json:"message"`
+	Topic   string `json:"topic"`
 }
 
 type postSendMessageResponse struct {

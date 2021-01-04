@@ -2,6 +2,7 @@ package main
 
 import (
 	"device-virtual/pkg/api"
+	"device-virtual/pkg/client/mosquitto"
 	"device-virtual/pkg/configs"
 	"flag"
 	"fmt"
@@ -11,11 +12,13 @@ import (
 	"syscall"
 
 	"github.com/go-kit/kit/log"
+	kitprometheus "github.com/go-kit/kit/metrics/prometheus"
+	stdprometheus "github.com/prometheus/client_golang/prometheus"
 )
 
 func main() {
 
-	cfg, err := configs.NewConfig()
+	cfg, err := configs.NewConfig("device")
 	if err != nil {
 		panic(err)
 	}
@@ -32,10 +35,28 @@ func main() {
 		logger = log.With(logger, "caller", log.DefaultCaller)
 	}
 
+	client := mosquitto.NewClient()
+
+	fieldKeys := []string{"method"}
+
 	var s api.Service
 	{
-		s = api.NewDeviceService(cfg.CAPath)
+		s = api.NewDeviceService(cfg.CAPath, client)
 		s = api.LoggingMidleware(logger)(s)
+		s = api.NewInstrumentingMiddleware(
+			kitprometheus.NewCounterFrom(stdprometheus.CounterOpts{
+				Namespace: "device_virtual",
+				Subsystem: "device_virtual_service",
+				Name:      "request_count",
+				Help:      "Number of requests received.",
+			}, fieldKeys),
+			kitprometheus.NewSummaryFrom(stdprometheus.SummaryOpts{
+				Namespace: "device_virtual",
+				Subsystem: "device_virtual_service",
+				Name:      "request_latency_microseconds",
+				Help:      "Total duration of requests in microseconds.",
+			}, fieldKeys),
+		)(s)
 	}
 
 	mux := http.NewServeMux()
