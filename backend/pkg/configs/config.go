@@ -9,6 +9,10 @@ type Config struct {
 	UIPort     string
 	UIProtocol string
 
+	ConsulProtocol string
+	ConsulHost     string
+	ConsulPort     string
+
 	CAPath string
 
 	CertFile string

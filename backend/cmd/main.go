@@ -4,6 +4,7 @@ import (
 	"device-virtual/pkg/api"
 	"device-virtual/pkg/client/mosquitto"
 	"device-virtual/pkg/configs"
+	"device-virtual/pkg/discovery/consul"
 	"flag"
 	"fmt"
 	"net/http"
@@ -14,6 +15,7 @@ import (
 	"github.com/go-kit/kit/log"
 	kitprometheus "github.com/go-kit/kit/metrics/prometheus"
 	stdprometheus "github.com/prometheus/client_golang/prometheus"
+	"github.com/prometheus/client_golang/prometheus/promhttp"
 )
 
 func main() {
@@ -59,10 +61,16 @@ func main() {
 		)(s)
 	}
 
+	consulsd, err := consul.NewServiceDiscovery(cfg.ConsulProtocol, cfg.ConsulHost, cfg.ConsulPort, logger)
+	if err != nil {
+		panic(err)
+	}
+
 	mux := http.NewServeMux()
 
 	mux.Handle("/v1/", api.MakeHTTPHandler(s, log.With(logger, "component", "HTTP")))
 	http.Handle("/", accessControl(mux, cfg.UIProtocol, cfg.UIHost, cfg.UIPort))
+	http.Handle("/metrics", promhttp.Handler())
 
 	errs := make(chan error)
 	go func() {
@@ -73,11 +81,12 @@ func main() {
 
 	go func() {
 		logger.Log("transport", "HTTP", "addr", "httpAddr")
+		consulsd.Register("https", "device", cfg.Port)
 		errs <- http.ListenAndServeTLS(*httpAddr, cfg.CertFile, cfg.KeyFile, nil)
 	}()
 
 	logger.Log("exit", <-errs)
-
+	consulsd.Deregister()
 }
 
 func accessControl(h http.Handler, UIProtocol string, UIHost string, UIPort string) http.Handler {

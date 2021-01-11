@@ -20,7 +20,7 @@ func MakeHTTPHandler(s Service, logger log.Logger) http.Handler {
 		httptransport.ServerErrorHandler(transport.NewLogErrorHandler(logger)),
 	}
 
-	r.Methods("GET").Path("/v1/device/health").Handler(httptransport.NewServer(
+	r.Methods("GET").Path("/v1/health").Handler(httptransport.NewServer(
 		e.HealthEndpoint,
 		decodeHealthRequest,
 		encodeResponse,
