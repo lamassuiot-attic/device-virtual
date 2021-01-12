@@ -5,7 +5,6 @@ import (
 	"device-virtual/pkg/client/mosquitto"
 	"device-virtual/pkg/configs"
 	"device-virtual/pkg/discovery/consul"
-	"flag"
 	"fmt"
 	"net/http"
 	"os"
@@ -19,17 +18,6 @@ import (
 )
 
 func main() {
-
-	cfg, err := configs.NewConfig("device")
-	if err != nil {
-		panic(err)
-	}
-
-	var (
-		httpAddr = flag.String("http.addr", ":"+cfg.Port, "HTTP listen address")
-	)
-	flag.Parse()
-
 	var logger log.Logger
 	{
 		logger = log.NewLogfmtLogger(os.Stderr)
@@ -37,7 +25,13 @@ func main() {
 		logger = log.With(logger, "caller", log.DefaultCaller)
 	}
 
-	client := mosquitto.NewClient()
+	cfg, err := configs.NewConfig("device")
+	if err != nil {
+		logger.Log("err", err, "msg", "Could not read environment configuration values")
+		os.Exit(1)
+	}
+
+	client := mosquitto.NewClient(logger)
 
 	fieldKeys := []string{"method"}
 
@@ -63,7 +57,8 @@ func main() {
 
 	consulsd, err := consul.NewServiceDiscovery(cfg.ConsulProtocol, cfg.ConsulHost, cfg.ConsulPort, logger)
 	if err != nil {
-		panic(err)
+		logger.Log("err", err, "msg", "Could not start connection with Consul Service Discovery")
+		os.Exit(1)
 	}
 
 	mux := http.NewServeMux()
@@ -82,7 +77,7 @@ func main() {
 	go func() {
 		logger.Log("transport", "HTTP", "addr", "httpAddr")
 		consulsd.Register("https", "device", cfg.Port)
-		errs <- http.ListenAndServeTLS(*httpAddr, cfg.CertFile, cfg.KeyFile, nil)
+		errs <- http.ListenAndServeTLS(":"+cfg.Port, cfg.CertFile, cfg.KeyFile, nil)
 	}()
 
 	logger.Log("exit", <-errs)

@@ -6,11 +6,20 @@ import (
 	"device-virtual/pkg/configs"
 	"fmt"
 	"io/ioutil"
+	"os"
 	"testing"
+
+	"github.com/go-kit/kit/log"
 )
 
 func TestConnect(t *testing.T) {
-	mq := NewClient()
+	var logger log.Logger
+	{
+		logger = log.NewLogfmtLogger(os.Stderr)
+		logger = log.With(logger, "ts", log.DefaultTimestampUTC)
+		logger = log.With(logger, "caller", log.DefaultCaller)
+	}
+	mq := NewClient(logger)
 	cfg, err := configs.NewConfig("devicetest")
 	if err != nil {
 		t.Fatal("Unable to load configuration")
@@ -41,7 +50,13 @@ func TestConnect(t *testing.T) {
 }
 
 func TestDisconnect(t *testing.T) {
-	mq := NewClient()
+	var logger log.Logger
+	{
+		logger = log.NewLogfmtLogger(os.Stderr)
+		logger = log.With(logger, "ts", log.DefaultTimestampUTC)
+		logger = log.With(logger, "caller", log.DefaultCaller)
+	}
+	mq := NewClient(logger)
 	cfg, err := configs.NewConfig("devicetest")
 	if err != nil {
 		t.Fatal("Unable to load configuration")
@@ -62,7 +77,13 @@ func TestDisconnect(t *testing.T) {
 }
 
 func TestSendMessage(t *testing.T) {
-	mq := NewClient()
+	var logger log.Logger
+	{
+		logger = log.NewLogfmtLogger(os.Stderr)
+		logger = log.With(logger, "ts", log.DefaultTimestampUTC)
+		logger = log.With(logger, "caller", log.DefaultCaller)
+	}
+	mq := NewClient(logger)
 	cfg, err := configs.NewConfig("devicetest")
 	if err != nil {
 		t.Fatal("Unable to load configuration")
