@@ -6,15 +6,18 @@ import (
 	"net/http"
 
 	"github.com/go-kit/kit/log"
+	"github.com/go-kit/kit/tracing/opentracing"
 
 	"github.com/go-kit/kit/transport"
 	httptransport "github.com/go-kit/kit/transport/http"
 	"github.com/gorilla/mux"
+
+	stdopentracing "github.com/opentracing/opentracing-go"
 )
 
-func MakeHTTPHandler(s Service, logger log.Logger) http.Handler {
+func MakeHTTPHandler(s Service, logger log.Logger, otTracer stdopentracing.Tracer) http.Handler {
 	r := mux.NewRouter()
-	e := MakeServerEndpoints(s)
+	e := MakeServerEndpoints(s, otTracer)
 
 	options := []httptransport.ServerOption{
 		httptransport.ServerErrorHandler(transport.NewLogErrorHandler(logger)),
@@ -24,28 +27,28 @@ func MakeHTTPHandler(s Service, logger log.Logger) http.Handler {
 		e.HealthEndpoint,
 		decodeHealthRequest,
 		encodeResponse,
-		options...,
+		append(options, httptransport.ServerBefore(opentracing.HTTPToContext(otTracer, "Health", logger)))...,
 	))
 
 	r.Methods("POST").Path("/v1/device/connect").Handler(httptransport.NewServer(
 		e.PostConnect,
 		decodePostConnectRequest,
 		encodeResponse,
-		options...,
+		append(options, httptransport.ServerBefore(opentracing.HTTPToContext(otTracer, "PostConnect", logger)))...,
 	))
 
 	r.Methods("POST").Path("/v1/device/disconnect").Handler(httptransport.NewServer(
 		e.PostDisconnect,
 		decodePostDisconnectRequest,
 		encodeResponse,
-		options...,
+		append(options, httptransport.ServerBefore(opentracing.HTTPToContext(otTracer, "PostDisconnect", logger)))...,
 	))
 
 	r.Methods("POST").Path("/v1/device/message").Handler(httptransport.NewServer(
 		e.PostSendMessage,
 		decodePostSendMessageRequest,
 		encodeResponse,
-		options...,
+		append(options, httptransport.ServerBefore(opentracing.HTTPToContext(otTracer, "PostSendMessage", logger)))...,
 	))
 	return r
 }
