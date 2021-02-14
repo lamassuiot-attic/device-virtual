@@ -2,6 +2,7 @@ package api
 
 import (
 	"context"
+	"fmt"
 	"time"
 
 	"github.com/go-kit/kit/metrics"
@@ -25,8 +26,9 @@ func NewInstrumentingMiddleware(counter metrics.Counter, latency metrics.Histogr
 
 func (mw *instrumentingMiddleware) Health(ctx context.Context) bool {
 	defer func(begin time.Time) {
-		mw.requestCount.With("method", "Health").Add(1)
-		mw.requestLatency.With("method", "Health").Observe(time.Since(begin).Seconds())
+		lvs := []string{"method", "Health", "error", "false"}
+		mw.requestCount.With(lvs...).Add(1)
+		mw.requestLatency.With(lvs...).Observe(time.Since(begin).Seconds())
 	}(time.Now())
 
 	return mw.next.Health(ctx)
@@ -34,8 +36,9 @@ func (mw *instrumentingMiddleware) Health(ctx context.Context) bool {
 
 func (mw *instrumentingMiddleware) PostSendMessage(ctx context.Context, message string, topic string) (err error) {
 	defer func(begin time.Time) {
-		mw.requestCount.With("method", "PostSendMessage").Add(1)
-		mw.requestLatency.With("method", "PostSendMessage").Observe(time.Since(begin).Seconds())
+		lvs := []string{"method", "PostSendMessage", "error", fmt.Sprint(err != nil)}
+		mw.requestCount.With(lvs...).Add(1)
+		mw.requestLatency.With(lvs...).Observe(time.Since(begin).Seconds())
 	}(time.Now())
 
 	return mw.next.PostSendMessage(ctx, message, topic)
@@ -43,8 +46,9 @@ func (mw *instrumentingMiddleware) PostSendMessage(ctx context.Context, message 
 
 func (mw *instrumentingMiddleware) PostConnect(ctx context.Context, authKey string, authCRT string, brokerURL string, clientID string) (err error) {
 	defer func(begin time.Time) {
-		mw.requestCount.With("method", "PostConnect").Add(1)
-		mw.requestLatency.With("method", "PostConnect").Observe(time.Since(begin).Seconds())
+		lvs := []string{"method", "PostConnect", "error", fmt.Sprint(err != nil)}
+		mw.requestCount.With(lvs...).Add(1)
+		mw.requestLatency.With(lvs...).Observe(time.Since(begin).Seconds())
 	}(time.Now())
 
 	return mw.next.PostConnect(ctx, authKey, authCRT, brokerURL, clientID)
@@ -52,8 +56,9 @@ func (mw *instrumentingMiddleware) PostConnect(ctx context.Context, authKey stri
 
 func (mw *instrumentingMiddleware) PostDisconnect(ctx context.Context) {
 	defer func(begin time.Time) {
-		mw.requestCount.With("method", "PostDisconnect").Add(1)
-		mw.requestLatency.With("method", "PostDisconnect").Observe(time.Since(begin).Seconds())
+		lvs := []string{"method", "PostDisconnect", "error", "false"}
+		mw.requestCount.With(lvs...).Add(1)
+		mw.requestLatency.With(lvs...).Observe(time.Since(begin).Seconds())
 	}(time.Now())
 
 	mw.next.PostDisconnect(ctx)
