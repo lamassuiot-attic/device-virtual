@@ -1,4 +1,4 @@
-module device-virtual
+module github.com/lamassuiot/device-virtual
 
 go 1.13
 

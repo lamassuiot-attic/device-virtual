@@ -3,12 +3,13 @@ package api
 import (
 	"context"
 	"crypto/tls"
-	"device-virtual/pkg/client"
-	"device-virtual/pkg/configs"
-	"device-virtual/pkg/mocks"
 	"fmt"
 	"io/ioutil"
 	"testing"
+
+	"github.com/lamassuiot/device-virtual/pkg/client"
+	"github.com/lamassuiot/device-virtual/pkg/configs"
+	"github.com/lamassuiot/device-virtual/pkg/mocks"
 )
 
 type serviceSetUp struct {

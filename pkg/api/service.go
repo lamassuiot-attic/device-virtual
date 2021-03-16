@@ -4,9 +4,10 @@ import (
 	"context"
 	"crypto/tls"
 	"crypto/x509"
-	"device-virtual/pkg/client"
 	"io/ioutil"
 	"sync"
+
+	"github.com/lamassuiot/device-virtual/pkg/client"
 
 	"github.com/pkg/errors"
 )

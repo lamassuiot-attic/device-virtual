@@ -3,11 +3,12 @@ package mosquitto
 import (
 	"crypto/tls"
 	"crypto/x509"
-	"device-virtual/pkg/configs"
 	"fmt"
 	"io/ioutil"
 	"os"
 	"testing"
+
+	"github.com/lamassuiot/device-virtual/pkg/configs"
 
 	"github.com/go-kit/kit/log"
 )

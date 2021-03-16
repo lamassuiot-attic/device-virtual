@@ -5,7 +5,7 @@ import (
 
 	"math/rand"
 
-	"device-virtual/pkg/discovery"
+	"github.com/lamassuiot/device-virtual/pkg/discovery"
 
 	"github.com/go-kit/kit/log"
 	"github.com/go-kit/kit/log/level"

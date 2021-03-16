@@ -2,7 +2,8 @@ package mosquitto
 
 import (
 	"crypto/tls"
-	"device-virtual/pkg/client"
+
+	"github.com/lamassuiot/device-virtual/pkg/client"
 
 	"github.com/go-kit/kit/log"
 	"github.com/go-kit/kit/log/level"

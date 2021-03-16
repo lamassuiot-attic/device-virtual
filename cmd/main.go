@@ -1,15 +1,16 @@
 package main
 
 import (
-	"device-virtual/pkg/api"
-	"device-virtual/pkg/client/mosquitto"
-	"device-virtual/pkg/configs"
-	"device-virtual/pkg/discovery/consul"
 	"fmt"
 	"net/http"
 	"os"
 	"os/signal"
 	"syscall"
+
+	"github.com/lamassuiot/device-virtual/pkg/api"
+	"github.com/lamassuiot/device-virtual/pkg/client/mosquitto"
+	"github.com/lamassuiot/device-virtual/pkg/configs"
+	"github.com/lamassuiot/device-virtual/pkg/discovery/consul"
 
 	"github.com/go-kit/kit/log"
 	"github.com/go-kit/kit/log/level"
