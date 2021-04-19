@@ -1,0 +1,65 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: device
+  labels:
+    app: device
+  annotations:
+    "sidecar.jaegertracing.io/inject": "true"
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: device
+  template:
+    metadata:
+      labels:
+        app: device
+    spec:
+      containers:
+        - name: device
+          image: device:latest
+          imagePullPolicy: Never
+          ports:
+            - containerPort: 8091
+          volumeMounts:
+            - name: ca
+              mountPath: "/var/lib/lksnext/lamassu/ca"
+              readOnly: true
+            - name: certs
+              mountPath: "/certs"
+              readOnly: true
+          env:
+            - name: DEVICE_PORT
+              value: "8091"
+            - name: DEVICE_UIHOST
+              value: "deviceui"
+            - name: DEVICE_UIPROTOCOL
+              value: "https"
+            - name: DEVICE_CAPATH
+              value: "/var/lib/lksnext/lamassu/ca/cacert.pem"
+            - name: DEVICE_CERTFILE
+              value: "/certs/device.crt"
+            - name: DEVICE_KEYFILE
+              value: "/certs/device.key"
+            - name: DEVICE_CONSULPROTOCOL
+              value: "https"
+            - name: DEVICE_CONSULHOST
+              value: "consul-server"
+            - name: DEVICE_CONSULPORT
+              value: "8501"
+            - name: DEVICE_CONSULCA
+              value: "/certs/consul.crt"
+            - name: JAEGER_SERVICE_NAME
+              value: "device-virtual"
+            - name: JAEGER_AGENT_HOST
+              value: "localhost"
+            - name: JAEGER_AGENT_PORT
+              value: "6831"
+      volumes:
+        - name: ca
+          secret:
+            secretName: device-virtual-ca
+        - name: certs
+          secret:
+            secretName: device-virtual-certs
